@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
     
-    // Use prepared statements to prevent SQL injection
+    // Secure prepared statement
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -14,11 +14,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
+        
         if (password_verify($password, $row['password'])) {
             $_SESSION['user'] = $row['fname'];
             $_SESSION['role'] = $row['role'];
 
-            // Redirect to dashboard after login
+            // Redirect users to the dashboard
             echo "<script>alert('Login Successful!'); window.location='dashboard.php';</script>";
             exit();
         } else {
@@ -33,8 +34,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $conn->close();
 ?>
 
-<form method="POST">
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+
+<div class="login-container">
+    <h2>Login</h2>
+    <form method="POST">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="register.php">Register</a></p>
+</div>
+
+</body>
+</html>

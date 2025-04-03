@@ -20,40 +20,18 @@ function isDuplicateProduct($conn, $sku) {
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
-    $category = $_POST['category'];
-    $brand = $_POST['brand'];
-    $supplier_id = $_POST['supplier'];
     $sku = $_POST['sku'];
-    $purchase_price = $_POST['purchase_price'];
-    $selling_price = $_POST['selling_price'];
-    $stock_quantity = $_POST['stock_quantity'];
-    $reorder_level = $_POST['reorder_level'];
-    $expiration_date = $_POST['expiration_date'];
+    $price = $_POST['price'];
+    $category = $_POST['category'];
+    $entity = $_POST['entity'];
 
-    $image = $_FILES['image']['name'];
-    $target_dir = "uploads/";
-    $target_file = $target_dir . basename($image);
-    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-
-    // Allowed file types
-    $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
-
-    if (!empty($name) && !empty($category) && !empty($sku) && !empty($purchase_price) && !empty($selling_price) && !empty($stock_quantity)) {
+    if (!empty($name) && !empty($sku) && !empty($price) && !empty($category) && !empty($entity)) {
         if (!isDuplicateProduct($conn, $sku)) {
-            // Upload image if valid
-            if (!empty($image) && in_array($imageFileType, $allowed_types)) {
-                move_uploaded_file($_FILES['image']['tmp_name'], $target_file);
-            } else {
-                $target_file = null; // No image uploaded or invalid file
-            }
+            $stmt = $conn->prepare("INSERT INTO products (name, sku, price, category, entity) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssdss", $name, $sku, $price, $category, $entity);
 
-            $stmt = $conn->prepare("INSERT INTO products 
-                (name, category, brand, supplier_id, sku, purchase_price, selling_price, stock_quantity, reorder_level, expiration_date, image) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssissddiss", $name, $category, $brand, $supplier_id, $sku, $purchase_price, $selling_price, $stock_quantity, $reorder_level, $expiration_date, $target_file);
-            
             if ($stmt->execute()) {
-                echo "<script>alert('Product added successfully.'); window.location='product_entry.php';</script>";
+                echo "<script>alert('Product added successfully!'); window.location='product_entry.php';</script>";
             } else {
                 echo "<script>alert('Error saving product.');</script>";
             }
@@ -61,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<script>alert('Duplicate product (SKU already exists)!');</script>";
         }
     } else {
-        echo "<script>alert('All required fields must be filled!');</script>";
+        echo "<script>alert('All fields must be filled!');</script>";
     }
 }
 ?>
@@ -75,47 +53,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="styles.css"> <!-- Link to external CSS -->
 </head>
 <body>
-    <div class="container">
-        <h2>Product Entry Form</h2>
-        <form method="POST" enctype="multipart/form-data">
-            <label>Product Name:</label>
-            <input type="text" name="name" required><br>
 
-            <label>Category:</label>
-            <input type="text" name="category" required><br>
+<div class="container">
+    <div class="back-arrow" onclick="history.back();">&#8592;</div> <!-- Back Arrow -->
+    <h2>Product Entry</h2>
+    <form method="POST">
+        <input type="text" name="name" placeholder="Enter Product Name" required>
+        <input type="text" name="sku" placeholder="Enter Product ID" required>
+        <input type="number" name="price" placeholder="Price" required>
+        <select name="category" required>
+            <option value="" disabled selected>Category</option>
+            <option value="Hand Tools">Hand Tools</option>
+            <option value="Power Tools">Power Tools</option>
+            <option value="Fasteners">Fasteners (Nails, Screws, Bolts)</option>
+            <option value="Plumbing">Plumbing</option>
+            <option value="Electrical">Electrical</option>
+            <option value="Paint & Adhesives">Paint & Adhesives</option>
+            <option value="Building Materials">Building Materials</option>
+            <option value="Safety Equipment">Safety Equipment</option>
+        </select>
+        <input type="text" name="entity" placeholder="Entity" required>
+        <button type="submit">Add Product</button>
+    </form>
+</div>
 
-            <label>Brand:</label>
-            <input type="text" name="brand"><br>
-
-            <label>Supplier:</label>
-            <select name="supplier">
-                <option value="1">Supplier A</option>
-                <option value="2">Supplier B</option>
-            </select><br>
-
-            <label>SKU:</label>
-            <input type="text" name="sku" required><br>
-
-            <label>Purchase Price:</label>
-            <input type="number" step="0.01" name="purchase_price" required><br>
-
-            <label>Selling Price:</label>
-            <input type="number" step="0.01" name="selling_price" required><br>
-
-            <label>Stock Quantity:</label>
-            <input type="number" name="stock_quantity" required><br>
-
-            <label>Reorder Level:</label>
-            <input type="number" name="reorder_level"><br>
-
-            <label>Expiration Date:</label>
-            <input type="date" name="expiration_date"><br>
-
-            <label>Product Image:</label>
-            <input type="file" name="image" accept="image/*"><br>
-
-            <button type="submit">Submit</button>
-        </form>
-    </div>
 </body>
 </html>
