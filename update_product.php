@@ -71,40 +71,40 @@ $result = $conn->query($sql);
 </head>
 <body>
 <div class="container">
-        <div style="text-align: left; margin-bottom: 10px;">
-            <div class="back-arrow" onclick="history.back();">&#8592;</div>
+    <div style="text-align: left; margin-bottom: 10px;">
+        <div class="back-arrow" onclick="history.back();">&#8592;</div>
     </div>
-        <h2>Product List</h2>
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Product Name</th>
-                <th>SKU</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Entity</th>
-                <th>Actions</th>
-            </tr>
-            <?php if ($result->num_rows > 0): ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $row['id']; ?></td>
-                        <td><?php echo $row['name']; ?></td>
-                        <td><?php echo $row['sku']; ?></td>
-                        <td><?php echo $row['category']; ?></td>
-                        <td>₱<?php echo number_format($row['price'], 2); ?></td>
-                        <td><?php echo $row['entity']; ?></td>
-                        <td>
-                            <a href="#" class="delete-btn" onclick="confirmDelete(<?php echo $row['id']; ?>)">Delete</a>
-                            <a href="edit_product.php?id=<?php echo $row['id']; ?>">Edit</a>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <tr><td colspan="7">No products found</td></tr>
-            <?php endif; ?>
-        </table>
-    </div>
+    <h2>Product List</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>SKU</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Quantity</th> <!-- Changed from Entity -->
+            <th>Actions</th>
+        </tr>
+        <?php if ($result->num_rows > 0): ?>
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo $row['id']; ?></td>
+                    <td><?php echo $row['name']; ?></td>
+                    <td><?php echo $row['sku']; ?></td>
+                    <td><?php echo $row['category']; ?></td>
+                    <td>₱<?php echo number_format($row['price'], 2); ?></td>
+                    <td><?php echo $row['quantity']; ?></td> <!-- Changed from Entity -->
+                    <td>
+                        <a href="#" class="delete-btn" onclick="confirmDelete(<?php echo $row['id']; ?>)">Delete</a>
+                        <a href="edit_product.php?id=<?php echo $row['id']; ?>">Edit</a>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <tr><td colspan="7">No products found</td></tr>
+        <?php endif; ?>
+    </table>
+</div>
 </body>
 </html>
 

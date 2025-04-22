@@ -5,9 +5,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fname = $_POST['fname'];
     $lname = $_POST['lname'];
     $email = $_POST['email'];
-    $role = $_POST['role']; // User role selection
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
+
+    // Set role to 'User' by default
+    $role = 'User';
 
     // Check if passwords match
     if ($password !== $confirm_password) {
@@ -57,10 +59,7 @@ $conn->close();
         <input type="text" name="fname" placeholder="Enter First Name" required>
         <input type="text" name="lname" placeholder="Enter Last Name" required>
         <input type="email" name="email" placeholder="Email" required>
-        <select name="role" required>
-            <option value="User">User</option>
-            <option value="Admin">Admin</option>
-        </select>
+        <!-- Role selection removed -->
         <input type="password" name="password" placeholder="Password" required>
         <input type="password" name="confirm_password" placeholder="Confirm Password" required>
         <button type="submit">Register</button>

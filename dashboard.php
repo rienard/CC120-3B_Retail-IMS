@@ -25,15 +25,22 @@ $role = $_SESSION['role'];
         <div class="sidebar">
             <h2>Dashboard</h2>
             <ul>
-                <!-- All users (Admin & User) can access these -->
+                <!-- All users (Admin & User) can access Add Product -->
                 <li><a href="product_entry.php">Add Product</a></li>
-                <li><a href="view_product.php">View Products</a></li>
-                <li><a href="update_product.php">Update Product</a></li>
-                <li><a href="delete_product.php">Delete Product</a></li>
 
-                <!-- Only Admins can access Sales Reports -->
+                <!-- Only non-admins (regular users) can view products -->
+                <?php if ($role !== 'Admin'): ?>
+                    <li><a href="view_product.php">View Products</a></li>
+                <?php endif; ?>
+
+                <!-- All users can update products -->
+                <li><a href="update_product.php">Update Product</a></li>
+
+                <!-- Only Admins can view the Sales report -->
                 <?php if ($role === 'Admin'): ?>
-                    <li><a href="sales_report.php">Sales Report</a></li>
+                    <li><a href="Sales_report.php">Sales report</a></li>
+                    <li><a href="sales_history.php">Sales history</a></li> <!-- ✅ Added this line -->
+                    <li><a href="Stock_level.php">Stock level</a></li>
                 <?php endif; ?>
                 
                 <li><a href="logout.php" class="logout-btn">Logout</a></li>

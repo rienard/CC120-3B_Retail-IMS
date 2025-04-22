@@ -14,7 +14,7 @@ if (isset($_GET['id'])) {
 
     // Check if the product exists
     if (!$product) {
-        echo "<script>alert('Product not found!'); window.location.href='index.php';</script>";
+        echo "<script>alert('Product not found!'); window.location.href='update_product.php';</script>";
         exit();
     }
 }
@@ -23,21 +23,20 @@ if (isset($_GET['id'])) {
 if (isset($_POST['update'])) {
     $id = $_POST['id'];
     $name = trim($_POST['name']);
-    $sku = trim($_POST['sku']);
     $category = trim($_POST['category']);
     $price = floatval($_POST['price']);
-    $entity = intval($_POST['entity']);
+    $quantity = intval($_POST['quantity']);
 
-    // Ensure all fields are filled
-    if (empty($name) || empty($sku) || empty($category) || $price <= 0 || $entity < 0) {
+    // Validate input
+    if (empty($name) || empty($category) || $price <= 0 || $quantity < 0) {
         echo "<script>alert('Please fill all fields correctly!');</script>";
     } else {
-        // Prepare the update query
-        $stmt = $conn->prepare("UPDATE products SET name=?, sku=?, category=?, price=?, entity=? WHERE id=?");
-        $stmt->bind_param("sssddi", $name, $sku, $category, $price, $entity, $id);
+        // Update product details (excluding SKU)
+        $stmt = $conn->prepare("UPDATE products SET name=?, category=?, price=?, quantity=? WHERE id=?");
+        $stmt->bind_param("ssdii", $name, $category, $price, $quantity, $id);
 
         if ($stmt->execute()) {
-            echo "<script>alert('Product updated successfully!'); window.location.href='index.php';</script>";
+            echo "<script>alert('Product updated successfully!'); window.location.href='update_product.php';</script>";
             exit();
         } else {
             echo "Error updating product: " . $conn->error;
@@ -76,6 +75,9 @@ if (isset($_POST['update'])) {
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+        input[disabled] {
+            background-color: #eee;
+        }
         button {
             background: #28a745;
             color: white;
@@ -97,36 +99,41 @@ if (isset($_POST['update'])) {
         a:hover {
             text-decoration: underline;
         }
+        .back-arrow {
+            font-size: 18px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-<div style="text-align: left; margin-bottom: 10px;">
-    <div class="back-arrow" onclick="history.back();">&#8592;</div>
+    <div style="text-align: left; margin-bottom: 10px;">
+        <div class="back-arrow" onclick="history.back();">&#8592;</div>
     </div>
     <h2>Edit Product</h2>
     <form method="POST">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($product['id']); ?>">
-        <label>Product Name:</label><br>
-        <input type="text" name="name" value="<?php echo htmlspecialchars($product['name']); ?>"><br>
 
-        <label>SKU:</label><br>
-        <input type="text" name="sku" value="<?php echo htmlspecialchars($product['sku']); ?>"><br>
+        <label>Product Name:</label><br>
+        <input type="text" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required><br>
+
+        <label>SKU </label><br>
+        <input type="text" name="sku_display" value="<?php echo htmlspecialchars($product['sku']); ?>" disabled><br>
 
         <label>Category:</label><br>
-        <input type="text" name="category" value="<?php echo htmlspecialchars($product['category']); ?>"><br>
+        <input type="text" name="category" value="<?php echo htmlspecialchars($product['category']); ?>" required><br>
 
         <label>Price:</label><br>
-        <input type="number" step="0.01" name="price" value="<?php echo htmlspecialchars($product['price']); ?>"><br>
+        <input type="number" step="0.01" name="price" value="<?php echo htmlspecialchars($product['price']); ?>" required><br>
 
-        <label>Entity:</label><br>
-        <input type="number" name="entity" value="<?php echo htmlspecialchars($product['entity']); ?>"><br>
+        <label>Quantity:</label><br>
+        <input type="number" name="quantity" value="<?php echo htmlspecialchars($product['quantity']); ?>" required><br>
 
         <button type="submit" name="update">Update Product</button>
-        <a href="dashboard.php">Back to Dashboard</a>
+        <a href="dashboard.php">Back to Dashboard</a><br>
+        <a href="update_product.php">Back to Products</a>
     </form>
-    <a href="update_product.php">Back to Products</a>
 </div>
 
 </body>

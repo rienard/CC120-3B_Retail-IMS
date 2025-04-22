@@ -23,11 +23,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sku = $_POST['sku'];
     $price = $_POST['price'];
     $category = $_POST['category'];
-    $entity = $_POST['entity'];
+    $entity = $_POST['Quantity'];
 
     if (!empty($name) && !empty($sku) && !empty($price) && !empty($category) && !empty($entity)) {
         if (!isDuplicateProduct($conn, $sku)) {
-            $stmt = $conn->prepare("INSERT INTO products (name, sku, price, category, entity) VALUES (?, ?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO products (name, sku, price, category, Quantity) VALUES (?, ?, ?, ?, ?)");
             $stmt->bind_param("ssdss", $name, $sku, $price, $category, $entity);
 
             if ($stmt->execute()) {
@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <option value="Building Materials">Building Materials</option>
             <option value="Safety Equipment">Safety Equipment</option>
         </select>
-        <input type="text" name="entity" placeholder="Entity" required>
+        <input type="text" name="Quantity" placeholder="Quantity" required>
         <button type="submit">Add Product</button>
     </form>
 </div>

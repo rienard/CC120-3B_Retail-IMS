@@ -2,41 +2,58 @@
 session_start();
 include 'db_connect.php';
 
+// Get user role
+$role = $_SESSION['role'] ?? '';
+
 // Initialize cart session if not set
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
-// Handle Add to Cart request
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
+// Handle Add to Cart request (only for non-admin users)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id']) && $role !== 'Admin') {
     $product_id = $_POST['product_id'];
+    $quantity = $_POST['quantity'];
 
-    // Get product details
-    $query = "SELECT * FROM products WHERE id = ? AND entity > 0";
+    $query = "SELECT * FROM products WHERE id = ? AND quantity >= ?";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $product_id);
+    $stmt->bind_param("ii", $product_id, $quantity);
     $stmt->execute();
     $result = $stmt->get_result();
     $product = $result->fetch_assoc();
-    
-    if ($product) {
-        // Add to cart
-        $_SESSION['cart'][] = $product;
 
-        // Decrease product entity in database
-        $update_query = "UPDATE products SET entity = entity - 1 WHERE id = ?";
+    if ($product) {
+        // Add the product to the session cart with the timestamp
+        $added_at = date('Y-m-d H:i:s');  // Current timestamp when added to cart
+        $_SESSION['cart'][] = [
+            'product_id' => $product['id'],
+            'name' => $product['name'],
+            'quantity' => $quantity,
+            'price' => $product['price'],
+            'added_at' => $added_at // Store timestamp in session
+        ];
+
+        // Update stock in products table
+        $update_query = "UPDATE products SET quantity = quantity - ? WHERE id = ?";
         $stmt = $conn->prepare($update_query);
-        $stmt->bind_param("i", $product_id);
+        $stmt->bind_param("ii", $quantity, $product_id);
+        $stmt->execute();
+
+        // Record the sale with the timestamp
+        $sale_date = date('Y-m-d H:i:s');  // Sale timestamp
+        $sale_query = "INSERT INTO sales (product_id, quantity_sold, sale_date) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sale_query);
+        $stmt->bind_param("iis", $product_id, $quantity, $sale_date);  // Store sale date
         $stmt->execute();
 
         echo "<script>alert('Product added to cart!'); window.location.href='view_product.php';</script>";
         exit();
     } else {
-        echo "<script>alert('Product is out of stock!');</script>";
+        echo "<script>alert('Not enough stock for this product!');</script>";
     }
 }
 
-// Fetch products from database
+// Fetch all products
 $sql = "SELECT * FROM products";
 $result = $conn->query($sql);
 ?>
@@ -47,7 +64,7 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Products</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to external CSS -->
+    <link rel="stylesheet" href="styles.css">
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; padding: 0; }
         .container { width: 80%; margin: auto; text-align: center; }
@@ -71,7 +88,7 @@ $result = $conn->query($sql);
                 <th>SKU</th>
                 <th>Category</th>
                 <th>Price</th>
-                <th>Entity</th>
+                <th>Quantity</th>
                 <th>Action</th>
             </tr>
             <?php if ($result->num_rows > 0): ?>
@@ -82,13 +99,18 @@ $result = $conn->query($sql);
                         <td><?php echo $row['sku']; ?></td>
                         <td><?php echo $row['category']; ?></td>
                         <td>&#8369;<?php echo number_format($row['price'], 2); ?></td>
-                        <td><?php echo $row['entity']; ?></td>
+                        <td><?php echo $row['quantity']; ?></td>
                         <td>
-                            <?php if ($row['entity'] > 0): ?>
-                                <form method="POST">
-                                    <input type="hidden" name="product_id" value="<?php echo $row['id']; ?>">
-                                    <button type="submit" class="add-btn">Add to Cart</button>
-                                </form>
+                            <?php if ($row['quantity'] > 0): ?>
+                                <?php if ($role !== 'Admin'): ?>
+                                    <form method="POST">
+                                        <input type="hidden" name="product_id" value="<?php echo $row['id']; ?>">
+                                        <input type="number" name="quantity" min="1" max="<?php echo $row['quantity']; ?>" value="1">
+                                        <button type="submit" class="add-btn">Add to Cart</button>
+                                    </form>
+                                <?php else: ?>
+                                    <span style="color: gray;">Viewing Only</span>
+                                <?php endif; ?>
                             <?php else: ?>
                                 <span style="color: red;">Out of Stock</span>
                             <?php endif; ?>
