@@ -26,14 +26,15 @@ if (isset($_POST['update'])) {
     $category = trim($_POST['category']);
     $price = floatval($_POST['price']);
     $quantity = intval($_POST['quantity']);
+    $expiry_date = $_POST['expiry_date']; // Get expiry date from the form
 
     // Validate input
-    if (empty($name) || empty($category) || $price <= 0 || $quantity < 0) {
+    if (empty($name) || empty($category) || $price <= 0 || $quantity < 0 || empty($expiry_date)) {
         echo "<script>alert('Please fill all fields correctly!');</script>";
     } else {
-        // Update product details (excluding SKU)
-        $stmt = $conn->prepare("UPDATE products SET name=?, category=?, price=?, quantity=? WHERE id=?");
-        $stmt->bind_param("ssdii", $name, $category, $price, $quantity, $id);
+        // Update product details including the expiry date
+        $stmt = $conn->prepare("UPDATE products SET name=?, category=?, price=?, quantity=?, expiry_date=? WHERE id=?");
+        $stmt->bind_param("ssdiss", $name, $category, $price, $quantity, $expiry_date, $id);
 
         if ($stmt->execute()) {
             echo "<script>alert('Product updated successfully!'); window.location.href='update_product.php';</script>";
@@ -68,7 +69,7 @@ if (isset($_POST['update'])) {
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
-        input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"], input[type="date"] {
             width: 90%;
             padding: 8px;
             margin: 5px 0;
@@ -118,7 +119,7 @@ if (isset($_POST['update'])) {
         <label>Product Name:</label><br>
         <input type="text" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required><br>
 
-        <label>SKU </label><br>
+        <label>SKU</label><br>
         <input type="text" name="sku_display" value="<?php echo htmlspecialchars($product['sku']); ?>" disabled><br>
 
         <label>Category:</label><br>
@@ -129,6 +130,9 @@ if (isset($_POST['update'])) {
 
         <label>Quantity:</label><br>
         <input type="number" name="quantity" value="<?php echo htmlspecialchars($product['quantity']); ?>" required><br>
+
+        <label>Expiry Date:</label><br>
+        <input type="date" name="expiry_date" value="<?php echo htmlspecialchars($product['expiry_date']); ?>" required><br>
 
         <button type="submit" name="update">Update Product</button>
         <a href="dashboard.php">Back to Dashboard</a><br>

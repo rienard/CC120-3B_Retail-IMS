@@ -48,6 +48,11 @@ header('Content-Disposition: attachment;filename="sales_report.csv"');
 $output = fopen('php://output', 'w');
 fputcsv($output, ['Product Name', 'Price', 'Total Quantity Sold', 'Total Sales']);
 
+// Variables to store totals
+$grand_total_qty = 0;
+$grand_total_sales = 0.0;
+
+// Write product rows and calculate totals
 while ($row = $result->fetch_assoc()) {
     fputcsv($output, [
         $row['product_name'],
@@ -55,7 +60,16 @@ while ($row = $result->fetch_assoc()) {
         $row['total_sold'],
         number_format($row['total_sales'], 2)
     ]);
+
+    $grand_total_qty += $row['total_sold'];
+    $grand_total_sales += $row['total_sales'];
 }
+
+// Add an empty row for spacing
+fputcsv($output, []);
+
+// Add the grand total row
+fputcsv($output, ['TOTAL', '', $grand_total_qty, number_format($grand_total_sales, 2)]);
 
 fclose($output);
 $stmt->close();

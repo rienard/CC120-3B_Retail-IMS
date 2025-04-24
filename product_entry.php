@@ -24,11 +24,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $price = $_POST['price'];
     $category = $_POST['category'];
     $entity = $_POST['Quantity'];
+    $expiry_date = $_POST['expiry_date']; // New expiry date input
 
-    if (!empty($name) && !empty($sku) && !empty($price) && !empty($category) && !empty($entity)) {
+    // Check if all fields are filled
+    if (!empty($name) && !empty($sku) && !empty($price) && !empty($category) && !empty($entity) && !empty($expiry_date)) {
+        // Check for duplicate SKU
         if (!isDuplicateProduct($conn, $sku)) {
-            $stmt = $conn->prepare("INSERT INTO products (name, sku, price, category, Quantity) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssdss", $name, $sku, $price, $category, $entity);
+            // Insert the product into the database
+            $stmt = $conn->prepare("INSERT INTO products (name, sku, price, category, Quantity, expiry_date) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssdsss", $name, $sku, $price, $category, $entity, $expiry_date);
 
             if ($stmt->execute()) {
                 echo "<script>alert('Product added successfully!'); window.location='product_entry.php';</script>";
@@ -61,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="text" name="name" placeholder="Enter Product Name" required>
         <input type="text" name="sku" placeholder="Enter Product ID" required>
         <input type="number" name="price" placeholder="Price" required>
+        
         <select name="category" required>
             <option value="" disabled selected>Category</option>
             <option value="Hand Tools">Hand Tools</option>
@@ -72,7 +77,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <option value="Building Materials">Building Materials</option>
             <option value="Safety Equipment">Safety Equipment</option>
         </select>
+
         <input type="text" name="Quantity" placeholder="Quantity" required>
+        <label>Expiry Date:</label>
+        <input type="date" name="expiry_date" required><br><br>
+
         <button type="submit">Add Product</button>
     </form>
 </div>

@@ -31,6 +31,7 @@ $role = $_SESSION['role'];
                 <!-- Only non-admins (regular users) can view products -->
                 <?php if ($role !== 'Admin'): ?>
                     <li><a href="view_product.php">View Products</a></li>
+                    <li><a href="cart.php">View Cart</a></li> <!-- ✅ CART LINK FOR USERS -->
                 <?php endif; ?>
 
                 <!-- All users can update products -->
@@ -38,10 +39,12 @@ $role = $_SESSION['role'];
 
                 <!-- Only Admins can view the Sales report -->
                 <?php if ($role === 'Admin'): ?>
-                    <li><a href="Sales_report.php">Sales report</a></li>
-                    <li><a href="sales_history.php">Sales history</a></li> <!-- ✅ Added this line -->
-                    <li><a href="Stock_level.php">Stock level</a></li>
+                    <li><a href="Sales_report.php">Sales Report</a></li>
+                    <li><a href="sales_history.php">Sales History</a></li>
+                    <li><a href="Stock_level.php">Stock Level</a></li>
                 <?php endif; ?>
+
+                <!-- Expired products (all users) -->
                 
                 <li><a href="logout.php" class="logout-btn">Logout</a></li>
             </ul>
